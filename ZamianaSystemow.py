@@ -26,21 +26,18 @@ def sysnadziesietny(reprezentacja, system):
     elif system == 1:
         wynik = len(reprezentacja)
     else:
-        reprezentacja = str(reprezentacja)
-        dlugosc = len(reprezentacja) - 1
         wynik = iterator = 0
         cyf = [10,11,12,13,14,15]
         lit = ['A', 'B', 'C','D','E','F']
-        while dlugosc >= 0:
-            if reprezentacja[dlugosc] in lit:
-                indeks = lit.index(reprezentacja[dlugosc])
-                wynik += cyf[indeks] * pow(system,iterator)
+        
+        for i in reprezentacja[::-1]:
+            if i in lit:
+                help = lit.index(i)
+                wynik += cyf[help] * pow(system,iterator)
             else:
-                wynik += int(reprezentacja[dlugosc]) * pow(system,iterator)
-            dlugosc-= 1
-            iterator += 1
+                wynik += int(i) * pow(system,iterator)
+            iterator +=1
         return wynik
-  
 
 print(dziesietnyna(155,16))
 print(sysnadziesietny(dziesietnyna(155,16),16))

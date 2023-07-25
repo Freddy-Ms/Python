@@ -144,12 +144,18 @@ def draw_hangman(canvas,attempts):
         elif len(body_parts[i]) == 3:
             x,y,r = body_parts[i]
             canvas.create_oval(x-r,y-r,x+r,y+r, fill="white", width=3, tags="hangman")
+
+
 window = Tk()
 window.title("Hangman Game!")
 window.configure(bg = "black")
+
 users_width, users_height = mon_resolution()
+
 window_width, window_height = users_width//2, users_height//2
+
 window.geometry(f"{window_width}x{window_height}+{(users_width-window_width)//2}+{(users_height - window_height)//2}")
+
 window.resizable(0,0)
 
 
