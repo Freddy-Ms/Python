@@ -16,7 +16,6 @@ class Snake:
         self.size = 2
         self.coordinates =[(WIDTH//2,HEIGHT//2),(WIDTH//2 - BODY_SIZE,HEIGHT//2)]
         self.direction = "right"
-        self.food = True
     def change_direction(self,direction):
         if direction == "right" and self.direction != "left":
             self.direction = "right"
