@@ -1,5 +1,6 @@
 import pygame
 import sys
+import textwrap
 pygame.font.init()
 pygame.init()
 FONT = pygame.font.SysFont("Arial", 40)
@@ -7,12 +8,11 @@ WIDTH = 1800
 HEIGHT = 900
 BLACK = (0,0,0)
 WHITE = (255,255,255)
-COLOR = (255,0,0)
 GRAY = (128,128,128)
 PLAYERGAP = 100
 XOFF = YOFF = 20
-CATEGORIES = ["Matematyka","Fizyka","Muzyka","Astronomia","Chemia","cos0","cos3","cos tam","abc","cba"]
-PLAYERS = ["Daniel","Maciek","Kacper","Michał"]
+CATEGORIES = ["Matematyka","Fizyka","Muzyka","Astronomia","Chemia","cos0","cos3"]
+PLAYERS = ["Daniel","Maciek","Kacper","Michał","As","xd"]
 NUMBER_OF_PLAYERS = len(PLAYERS) 
 PLAYER_WIDTH = 150
 class Board:
@@ -109,8 +109,6 @@ class Board:
             return None
         else:
             self.player[nr_of_player].score += self.cubes[row][col].value
-
-
     def selection_cube(self):
         row, col = self.selected
         self.cubes[row][col].selected = True
@@ -126,10 +124,6 @@ class Board:
         row,col = self.selected
         self.cubes[row][col].show_anserw = True
 
-        
-        
-
-
 class Cube:
     def __init__(self,window,question,anserw,row,column,width,height,value):
         self.window = window
@@ -143,7 +137,6 @@ class Cube:
         self.show_anserw = False
         self.value = value
         self.disabled = False
-
     def draw(self):
         width_gap = self.width/ len(CATEGORIES)
         height_gap = self.height / 6
@@ -157,12 +150,15 @@ class Cube:
                 display = FONT.render(str(self.value),1,GRAY)
                 self.window.blit(display,(x+XOFF+(width_gap/2 - display.get_width()/2),y+YOFF + (height_gap/2 - display.get_height()/2))) 
         else:
-          #  display = self.wrap_text(self.question,FONT,WIDTH)
             display = FONT.render(self.question,BLACK,1)
-            self.window.blit(display,(WIDTH/2 - display.get_width()/2 ,100))
+            y_pos = 50
+            display = wrap_text(self.question,FONT,display.get_width())
+            for line in display:
+                self.window.blit(line,(WIDTH/2-line.get_width()/2,y_pos))
+                y_pos +=  line.get_height() + 10
         if self.show_anserw:
             display = FONT.render(self.anserw,BLACK,1)
-            self.window.blit(display,(WIDTH/2 - display.get_width()/2,HEIGHT/2))
+            self.window.blit(display,(WIDTH/2 - display.get_width()/2,y_pos+30))
 class Player:
     def __init__(self,window,name,counter,height,x):
         self.window = window
@@ -178,7 +174,27 @@ class Player:
         display = FONT.render(str(self.score),BLACK,1)
         self.window.blit(display,(self.x_pos+PLAYER_WIDTH/2 - display.get_width()/2,HEIGHT- (self.height/2)))
             
-
+def wrap_text(text,font,txt_width):
+    nr_of_lines = (txt_width // (WIDTH - 20)) + 1
+    center = int(txt_width / nr_of_lines)
+    words = text.split()
+    lines = []
+    current_line = ""
+    
+    for word in words:
+        test_line = current_line + " " + word #if current_line else word
+        test_width, _ = font.size(test_line)
+        
+        if test_width <= center:
+            current_line = test_line
+        else:
+            lines.append(current_line)
+            current_line = word
+    
+    lines.append(current_line)
+    rendered_lines = [font.render(line, True, BLACK) for line in lines]
+    return rendered_lines
+   
 
 
 def draw_whole_window(window,board):
@@ -203,12 +219,8 @@ def main():
                         board.disable_cube()
                 elif board.selected:
                     click = board.select_player(pos)
-                    print(click)
                     if click >= 0 and click< NUMBER_OF_PLAYERS:
                         board.give_points(click)
-                   # if board.select_player(pos) == True:
-                    #    board.give_points(board.select_player(pos))
-                     #   print("Punkty")
                     
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE or event.key == pygame.K_DELETE:
