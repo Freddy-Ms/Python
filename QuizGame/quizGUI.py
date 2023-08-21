@@ -11,10 +11,11 @@ WHITE = (255,255,255)
 GRAY = (128,128,128)
 PLAYERGAP = 100
 XOFF = YOFF = 20
-CATEGORIES = ["Matematyka","Fizyka","Muzyka","Astronomia","Chemia","cos0","cos3"]
-PLAYERS = ["Daniel","Maciek","Kacper","Michał","As","xd"]
+CATEGORIES = ["Matematyka","Fizyka","Muzyka","Astronomia","Chemia","cos0","cos3","hejka"]
+PLAYERS = ["Daniel","Maciek","Kacper","Michał","As","xd","debil"]
 NUMBER_OF_PLAYERS = len(PLAYERS) 
 PLAYER_WIDTH = 150
+QUESTIONS_AMOUNT = 5
 class Board:
     def read(self):
         try:
@@ -40,7 +41,7 @@ class Board:
         self.width = width
         self.height = height
         self.columns = ctg_number 
-        self.rows = 5
+        self.rows = QUESTIONS_AMOUNT
         self.questions, self.anserws = self.read()
         self.cubes = [[Cube(self.window,self.questions[i][j], self.anserws[i][j],i,j,width,height, value =(i +1)*100) for j in range(self.columns)] for i in range(self.rows)]
         self.player =[Player(window,PLAYERS[i],i,PLAYERGAP,((WIDTH/2)- (NUMBER_OF_PLAYERS * PLAYER_WIDTH / 2) + (PLAYER_WIDTH * i))) for i in range (NUMBER_OF_PLAYERS)]
@@ -123,6 +124,12 @@ class Board:
     def show_anserws(self):
         row,col = self.selected
         self.cubes[row][col].show_anserw = True
+    def delete_points(self,nr_of_player):
+        row, col = self.selected
+        if nr_of_player > NUMBER_OF_PLAYERS - 1:
+            return None
+        else:
+            self.player[nr_of_player].score -= self.cubes[row][col].value
 
 class Cube:
     def __init__(self,window,question,anserw,row,column,width,height,value):
@@ -139,7 +146,7 @@ class Cube:
         self.disabled = False
     def draw(self):
         width_gap = self.width/ len(CATEGORIES)
-        height_gap = self.height / 6
+        height_gap = self.height / (QUESTIONS_AMOUNT + 1)
         x = self.column * width_gap
         y = self.row * height_gap
         if not self.selected:
@@ -152,13 +159,23 @@ class Cube:
         else:
             display = FONT.render(self.question,BLACK,1)
             y_pos = 50
-            display = wrap_text(self.question,FONT,display.get_width())
-            for line in display:
-                self.window.blit(line,(WIDTH/2-line.get_width()/2,y_pos))
-                y_pos +=  line.get_height() + 10
+            if display.get_width() > WIDTH-20:
+                display = wrap_text(self.question,FONT,display.get_width())
+                for line in display:
+                    self.window.blit(line,(WIDTH/2-line.get_width()/2,y_pos))
+                    y_pos +=  line.get_height() + 10
+            else:
+                self.window.blit(display,(WIDTH/2-display.get_width()/2,y_pos))
+                y_pos += display.get_height() + 10
         if self.show_anserw:
             display = FONT.render(self.anserw,BLACK,1)
-            self.window.blit(display,(WIDTH/2 - display.get_width()/2,y_pos+30))
+            if display.get_width() > WIDTH-20:
+                display = wrap_text(self.anserw,FONT,display.get_width())
+                for line in display:
+                    self.window.blit(line,(WIDTH/2-line.get_width()/2,y_pos))
+                    y_pos += line.get_height() + 10
+            else:
+                self.window.blit(display,(WIDTH/2-display.get_width()/2,y_pos))
 class Player:
     def __init__(self,window,name,counter,height,x):
         self.window = window
@@ -182,7 +199,7 @@ def wrap_text(text,font,txt_width):
     current_line = ""
     
     for word in words:
-        test_line = current_line + " " + word #if current_line else word
+        test_line = current_line + " " + word 
         test_width, _ = font.size(test_line)
         
         if test_width <= center:
@@ -216,20 +233,25 @@ def main():
                 if chosen_question and board.selected == False:
                     if chosen_question:
                         board.select(chosen_question[0],chosen_question[1])
-                        board.disable_cube()
                 elif board.selected:
                     click = board.select_player(pos)
                     if click >= 0 and click< NUMBER_OF_PLAYERS:
                         board.give_points(click)
-                    
+                        
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+                pos = pygame.mouse.get_pos()
+                if board.selected:
+                    click = board.select_player(pos)
+                    if click >= 0 and click < NUMBER_OF_PLAYERS:
+                        board.delete_points(click)
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE or event.key == pygame.K_DELETE:
                     board.clear()
                     board.clear_cube()
                 if event.key == pygame.K_SPACE and board.selected:
+                    board.disable_cube()
                     board.show_anserws()
-
-       # print(board.selected)
         draw_whole_window(window,board)  
         pygame.display.update()
 
